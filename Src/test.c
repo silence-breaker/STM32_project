@@ -58,9 +58,9 @@ static u16 led_breath_timer = 0;
 #define WAVE_CHART_X    108
 #define WAVE_CHART_W    360
 #define WAVE_CHART_H    62
-#define WAVE_TEMP_Y     42
-#define WAVE_HUM_Y      120
-#define WAVE_PRESS_Y    198
+#define WAVE_TEMP_Y     48
+#define WAVE_HUM_Y      124
+#define WAVE_PRESS_Y    200
 
 #define WAVE_TEMP_MIN   -100
 #define WAVE_TEMP_MAX   500
@@ -73,6 +73,19 @@ static u16 led_breath_timer = 0;
 #define LED_BREATH_UPDATE_MS    10
 #define LED_BREATH_STEP_MS      20
 #define LED_FLASH_INTERVAL_MS   250
+
+#define UI_BG                   0xF7BE
+#define UI_CARD                 WHITE
+#define UI_SHADOW               0xD69A
+#define UI_TEXT                 0x2104
+#define UI_MUTED                0x6B4D
+#define UI_ORANGE               0xFD20
+#define UI_TEAL                 0x05B3
+#define UI_PURPLE               0x781F
+#define UI_LIME                 0x7FE0
+#define UI_BLUE                 0x04BF
+#define UI_NAV_OFF              0xDEFB
+#define UI_HINT                 0xD71C
 
 static s16 wave_temp[WAVE_POINTS];
 static s16 wave_hum[WAVE_POINTS];
@@ -515,115 +528,217 @@ void HandleKey(u8 key)
 
 /* ========== 页面绘制函数 ========== */
 
+static void UiFill(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
+{
+    if(lcddev.width == 0 || lcddev.height == 0) return;
+    if(x1 > x2 || y1 > y2) return;
+    if(x1 >= lcddev.width || y1 >= lcddev.height) return;
+    if(x2 >= lcddev.width) x2 = lcddev.width - 1;
+    if(y2 >= lcddev.height) y2 = lcddev.height - 1;
+    if(x1 > x2 || y1 > y2) return;
+
+    LCD_Fill(x1, y1, x2, y2, color);
+}
+
+static void UiTextCenter(u16 x1, u16 x2, u16 y, u16 fc, u16 bc, u8 *text, u8 size)
+{
+    u16 char_w = size / 2;
+    u16 text_w;
+    u16 x;
+
+    if(char_w == 0 || text == NULL) return;
+    text_w = (u16)(strlen((char*)text) * char_w);
+    x = x1;
+    if(x2 > x1 && text_w < (u16)(x2 - x1 + 1))
+    {
+        x = x1 + (u16)(((x2 - x1 + 1) - text_w) / 2);
+    }
+    LCD_ShowString(x, y, fc, bc, size, text, 1);
+}
+
+static void FillRoundRect(u16 x1, u16 y1, u16 x2, u16 y2, u16 r, u16 color)
+{
+    u32 w, h, min_size;
+
+    if(lcddev.width == 0 || lcddev.height == 0) return;
+    if(x1 > x2 || y1 > y2) return;
+    if(x1 >= lcddev.width || y1 >= lcddev.height) return;
+    if(x2 >= lcddev.width) x2 = lcddev.width - 1;
+    if(y2 >= lcddev.height) y2 = lcddev.height - 1;
+    if(x1 > x2 || y1 > y2) return;
+
+    w = (u32)x2 - x1 + 1;
+    h = (u32)y2 - y1 + 1;
+    min_size = (u32)r * 2 + 1;
+    if(r == 0 || w < min_size || h < min_size)
+    {
+        UiFill(x1, y1, x2, y2, color);
+        return;
+    }
+
+    UiFill(x1 + r, y1, x2 - r, y2, color);
+    UiFill(x1, y1 + r, x2, y2 - r, color);
+    gui_circle(x1 + r, y1 + r, color, r, 1);
+    gui_circle(x2 - r, y1 + r, color, r, 1);
+    gui_circle(x1 + r, y2 - r, color, r, 1);
+    gui_circle(x2 - r, y2 - r, color, r, 1);
+}
+
+static void DrawCard(u16 x1, u16 y1, u16 x2, u16 y2, u16 r, u16 accent)
+{
+    FillRoundRect(x1 + 3, y1 + 4, x2 + 3, y2 + 4, r, UI_SHADOW);
+    FillRoundRect(x1, y1, x2, y2, r, UI_CARD);
+    UiFill(x1, y1, x2, y1 + 30, accent);
+}
+
+static void DrawMiniIcon(u16 cx, u16 cy, u8 type, u16 color)
+{
+    POINT_COLOR = color;
+    if(type == 0)
+    {
+        LCD_DrawLine(cx, cy - 16, cx, cy + 7);
+        LCD_DrawLine(cx - 4, cy - 16, cx + 4, cy - 16);
+        LCD_DrawLine(cx - 4, cy - 16, cx - 4, cy + 7);
+        LCD_DrawLine(cx + 4, cy - 16, cx + 4, cy + 7);
+        gui_circle(cx, cy + 10, color, 8, 0);
+        gui_circle(cx, cy + 10, color, 4, 1);
+        LCD_Fill(cx - 2, cy - 7, cx + 2, cy + 9, color);
+        LCD_DrawLine(cx + 8, cy - 12, cx + 14, cy - 12);
+        LCD_DrawLine(cx + 8, cy - 5, cx + 13, cy - 5);
+        LCD_DrawLine(cx + 8, cy + 2, cx + 14, cy + 2);
+    }
+    else if(type == 1)
+    {
+        gui_circle(cx, cy + 2, color, 17, 0);
+        LCD_DrawLine(cx, cy - 19, cx - 14, cy + 7);
+        LCD_DrawLine(cx, cy - 19, cx + 14, cy + 7);
+        LCD_DrawLine(cx - 7, cy + 11, cx + 7, cy + 11);
+        LCD_DrawLine(cx - 8, cy + 4, cx - 2, cy + 10);
+    }
+    else
+    {
+        gui_circle(cx, cy, color, 19, 0);
+        gui_circle(cx, cy, color, 14, 0);
+        LCD_DrawLine(cx, cy, cx + 8, cy - 9);
+        LCD_DrawLine(cx, cy, cx - 10, cy + 5);
+        gui_circle(cx, cy, color, 3, 1);
+        LCD_DrawLine(cx - 12, cy + 12, cx + 12, cy + 12);
+    }
+}
+
+static void DrawValueCard(u16 x1, u16 y1, u16 x2, u16 y2, u16 accent, u8 *title)
+{
+    DrawCard(x1, y1, x2, y2, 16, accent);
+    UiTextCenter(x1, x2, y1 + 8, WHITE, accent, title, 16);
+}
+
+static void DrawPressureCard(void)
+{
+    DrawCard(20, 198, 400, 252, 14, UI_LIME);
+    UiTextCenter(20, 400, 207, WHITE, UI_LIME, (u8*)"PRESSURE", 16);
+}
+
+static void DrawHintBar(void)
+{
+    UiFill(0, 258, 479, 279, UI_HINT);
+    LCD_ShowString(42, 262, BLACK, UI_HINT, 16, (u8*)"Key Left/Right: switch", 1);
+    LCD_ShowString(232, 262, BLACK, UI_HINT, 16, (u8*)"Up/Down: adjust  OK: confirm", 1);
+}
+
 void DrawTitleBar(u8 *title)
 {
-    LCD_Fill(0, 0, 480, 35, DARKBLUE);
-    POINT_COLOR = WHITE;
-    BACK_COLOR = DARKBLUE;
-    Gui_StrCenter(0, 8, WHITE, DARKBLUE, title, 16, 1);
+    u16 right = (lcddev.width > 0) ? (lcddev.width - 1) : 479;
+
+    UiFill(0, 0, right, 13, 0x045F);
+    UiFill(0, 14, right, 27, UI_BLUE);
+    UiFill(0, 28, right, 40, UI_PURPLE);
+    UiTextCenter(0, right, 12, WHITE, UI_BLUE, title, 16);
 }
 
 void DrawNavBar(void)
 {
     u16 i;
-    u16 btn_colors[PAGE_COUNT] = {LIGHTGRAY, LIGHTGRAY, LIGHTGRAY, LIGHTGRAY, LIGHTGRAY};
     u8 *btn_texts[PAGE_COUNT] = {(u8*)"Home", (u8*)"Temp", (u8*)"Hum", (u8*)"Press", (u8*)"Wave"};
-    u16 nav_width = lcddev.width / PAGE_COUNT;
-    
-    btn_colors[current_page] = GREEN;
-    
+    u16 nav_width;
+    u16 nav_bottom;
+
+    if(lcddev.width == 0 || lcddev.height == 0) return;
+    nav_width = lcddev.width / PAGE_COUNT;
+    nav_bottom = (NAV_BTN_Y_END >= lcddev.height) ? (lcddev.height - 1) : NAV_BTN_Y_END;
+
+    UiFill(0, NAV_BTN_Y_START, lcddev.width - 1, nav_bottom, UI_BG);
     for(i = 0; i < PAGE_COUNT; i++)
     {
         u16 x1 = i * nav_width;
         u16 x2 = (i + 1) * nav_width - 1;
+        u16 bg = (i == current_page) ? GREEN : UI_NAV_OFF;
+        u16 fg = (i == current_page) ? WHITE : UI_TEXT;
         if(i == PAGE_COUNT - 1) x2 = lcddev.width - 1;
-        
-        LCD_Fill(x1, NAV_BTN_Y_START, x2, NAV_BTN_Y_END, btn_colors[i]);
-        POINT_COLOR = BLACK;
-        BACK_COLOR = btn_colors[i];
-        
+
+        FillRoundRect(x1 + 3, NAV_BTN_Y_START + 3, x2 - 3, nav_bottom - 2, 14, bg);
         u16 text_x = x1 + (nav_width - strlen((char*)btn_texts[i]) * 8) / 2;
         u16 text_y = NAV_BTN_Y_START + 10;
-        LCD_ShowString(text_x, text_y, BLACK, btn_colors[i], 16, btn_texts[i], 1);
-    }
-    
-    for(i = 1; i < PAGE_COUNT; i++)
-    {
-        LCD_DrawLine(nav_width * i, NAV_BTN_Y_START, nav_width * i, NAV_BTN_Y_END);
+        LCD_ShowString(text_x, text_y, fg, bg, 16, btn_texts[i], 1);
     }
 }
 
 static void DrawHomeDynamic(void)
 {
     char buf[32];
+    u16 temp_color = g_temp_alert ? RED : BLACK;
+    u16 hum_color = g_hum_alert ? BLUE : BLACK;
+    u16 press_color = g_press_alert ? MAGENTA : BLACK;
 
-    LCD_Fill(140, 40, 260, 64, WHITE);
-    sprintf(buf, "%2d.%d", g_temp / 10, abs(g_temp % 10));
-    POINT_COLOR = g_temp_alert ? RED : BLACK;
-    LCD_ShowString(140, 40, POINT_COLOR, WHITE, 16, (u8*)buf, 1);
-    LCD_ShowString(195, 40, BLACK, WHITE, 16, (u8*)"C", 1);
-    gui_circle(193, 42, BLACK, 2, 0);
-    LCD_Fill(380, 30, 430, 80, WHITE);
-    if(g_temp_alert)
-        Gui_Drawbmp16_Custom(380, 30, ICON_HIGHTEMP_W, ICON_HIGHTEMP_H, gImage_high_temp);
-    else
-        Gui_Drawbmp16_Custom(380, 30, ICON_NORMAL_W, ICON_NORMAL_H, gImage_normal);
+    sprintf(buf, "%2d.%d C", g_temp / 10, abs(g_temp % 10));
+    LCD_Fill(52, 109, 170, 128, UI_CARD);
+    LCD_ShowString(52, 109, temp_color, UI_CARD, 16, (u8*)buf, 1);
+    DrawMiniIcon(109, 168, 0, temp_color);
 
-    LCD_Fill(140, 90, 260, 114, WHITE);
     sprintf(buf, "%2d.%d %%", g_humidity / 10, abs(g_humidity % 10));
-    POINT_COLOR = g_hum_alert ? BLUE : BLACK;
-    LCD_ShowString(140, 90, POINT_COLOR, WHITE, 16, (u8*)buf, 1);
-    LCD_Fill(380, 80, 430, 130, WHITE);
-    if(g_hum_alert)
-        Gui_Drawbmp16_Custom(380, 80, ICON_HIGHHUM_W, ICON_HIGHHUM_H, gImage_high_humidity);
-    else
-        Gui_Drawbmp16_Custom(380, 80, ICON_NORMAL_W, ICON_NORMAL_H, gImage_normal);
+    LCD_Fill(254, 109, 372, 128, UI_CARD);
+    LCD_ShowString(254, 109, hum_color, UI_CARD, 16, (u8*)buf, 1);
+    DrawMiniIcon(311, 168, 1, hum_color);
 
-    LCD_Fill(140, 140, 280, 164, WHITE);
     sprintf(buf, "%4d.%d hPa", g_pressure / 10, abs(g_pressure % 10));
-    POINT_COLOR = g_press_alert ? MAGENTA : BLACK;
-    LCD_ShowString(140, 140, POINT_COLOR, WHITE, 16, (u8*)buf, 1);
-    LCD_Fill(380, 130, 430, 180, WHITE);
-    if(g_press_alert)
-        Gui_Drawbmp16_Custom(380, 130, ICON_HIGHQIYA_W, ICON_HIGHQIYA_H, gImage_highQIYA);
-    else
-        Gui_Drawbmp16_Custom(380, 130, ICON_NORMAL_W, ICON_NORMAL_H, gImage_normal);
+    LCD_Fill(104, 229, 228, 248, UI_CARD);
+    LCD_ShowString(104, 229, press_color, UI_CARD, 16, (u8*)buf, 1);
+    DrawMiniIcon(334, 233, 2, press_color);
 }
 
 static void DrawTempDynamic(void)
 {
     char buf[32];
-    u16 high_bg = WHITE, low_bg = WHITE;
+    u16 high_bg = UI_CARD, low_bg = UI_CARD;
     int high_val = g_temp_thresh.high;
     int low_val = g_temp_thresh.low;
 
     if(g_temp_thresh.edit_state == THRESH_EDIT_HIGH)
     {
-        high_bg = GREEN;
+        high_bg = UI_LIME;
         high_val = edit_temp_high;
     }
     else if(g_temp_thresh.edit_state == THRESH_EDIT_LOW)
     {
-        low_bg = GREEN;
+        low_bg = UI_LIME;
         low_val = edit_temp_low;
     }
 
-    LCD_Fill(60, 100, 200, 124, WHITE);
+    LCD_Fill(65, 102, 210, 126, UI_CARD);
     POINT_COLOR = g_temp_alert ? RED : BLACK;
     sprintf(buf, "%2d.%d", g_temp / 10, abs(g_temp % 10));
-    LCD_ShowString(60, 100, POINT_COLOR, WHITE, 16, (u8*)buf, 1);
-    LCD_ShowString(100, 100, BLACK, WHITE, 16, (u8*)"C", 1);
-    gui_circle(98, 102, BLACK, 2, 0);
+    LCD_ShowString(65, 102, POINT_COLOR, UI_CARD, 16, (u8*)buf, 1);
+    LCD_ShowString(105, 102, BLACK, UI_CARD, 16, (u8*)"C", 1);
+    gui_circle(103, 104, BLACK, 2, 0);
 
-    LCD_Fill(60, 150, 300, 166, high_bg);
+    FillRoundRect(65, 153, 305, 176, 8, high_bg);
     sprintf(buf, "High: >%d.%d C", high_val / 10, abs(high_val % 10));
-    LCD_ShowString(60, 150, BLACK, high_bg, 16, (u8*)buf, 1);
+    LCD_ShowString(75, 157, BLACK, high_bg, 16, (u8*)buf, 1);
 
-    LCD_Fill(60, 180, 300, 196, low_bg);
+    FillRoundRect(65, 184, 305, 207, 8, low_bg);
     sprintf(buf, "Low:  <%d.%d C", low_val / 10, abs(low_val % 10));
-    LCD_ShowString(60, 180, BLACK, low_bg, 16, (u8*)buf, 1);
+    LCD_ShowString(75, 188, BLACK, low_bg, 16, (u8*)buf, 1);
 
-    LCD_Fill(340, 100, 390, 150, WHITE);
+    LCD_Fill(340, 100, 390, 150, UI_CARD);
     if(g_temp_alert)
         Gui_Drawbmp16_Custom(340, 100, ICON_TEMPBIG_W, ICON_TEMPBIG_H, gImage_high_temp);
     else
@@ -633,36 +748,36 @@ static void DrawTempDynamic(void)
 static void DrawHumidityDynamic(void)
 {
     char buf[32];
-    u16 high_bg = WHITE, low_bg = WHITE;
+    u16 high_bg = UI_CARD, low_bg = UI_CARD;
     int high_val = g_hum_thresh.high;
     int low_val = g_hum_thresh.low;
 
     if(g_hum_thresh.edit_state == THRESH_EDIT_HIGH)
     {
-        high_bg = GREEN;
+        high_bg = UI_LIME;
         high_val = edit_hum_high;
     }
     else if(g_hum_thresh.edit_state == THRESH_EDIT_LOW)
     {
-        low_bg = GREEN;
+        low_bg = UI_LIME;
         low_val = edit_hum_low;
     }
 
-    LCD_Fill(60, 100, 180, 124, WHITE);
+    LCD_Fill(65, 102, 190, 126, UI_CARD);
     POINT_COLOR = g_hum_alert ? BLUE : BLACK;
     sprintf(buf, "%2d.%d", g_humidity / 10, abs(g_humidity % 10));
-    LCD_ShowString(60, 100, POINT_COLOR, WHITE, 16, (u8*)buf, 1);
-    LCD_ShowString(100, 100, BLACK, WHITE, 16, (u8*)"%", 1);
+    LCD_ShowString(65, 102, POINT_COLOR, UI_CARD, 16, (u8*)buf, 1);
+    LCD_ShowString(105, 102, BLACK, UI_CARD, 16, (u8*)"%", 1);
 
-    LCD_Fill(60, 150, 300, 166, high_bg);
+    FillRoundRect(65, 153, 305, 176, 8, high_bg);
     sprintf(buf, "High: >%d.%d %%", high_val / 10, abs(high_val % 10));
-    LCD_ShowString(60, 150, BLACK, high_bg, 16, (u8*)buf, 1);
+    LCD_ShowString(75, 157, BLACK, high_bg, 16, (u8*)buf, 1);
 
-    LCD_Fill(60, 180, 300, 196, low_bg);
+    FillRoundRect(65, 184, 305, 207, 8, low_bg);
     sprintf(buf, "Low:  <%d.%d %%", low_val / 10, abs(low_val % 10));
-    LCD_ShowString(60, 180, BLACK, low_bg, 16, (u8*)buf, 1);
+    LCD_ShowString(75, 188, BLACK, low_bg, 16, (u8*)buf, 1);
 
-    LCD_Fill(340, 100, 390, 150, WHITE);
+    LCD_Fill(340, 100, 390, 150, UI_CARD);
     if(g_hum_alert)
         Gui_Drawbmp16_Custom(340, 100, ICON_HUMIDBIG_W, ICON_HUMIDBIG_H, gImage_high_humidity);
     else
@@ -672,36 +787,36 @@ static void DrawHumidityDynamic(void)
 static void DrawPressureDynamic(void)
 {
     char buf[32];
-    u16 high_bg = WHITE, low_bg = WHITE;
+    u16 high_bg = UI_CARD, low_bg = UI_CARD;
     int high_val = g_press_thresh.high;
     int low_val = g_press_thresh.low;
 
     if(g_press_thresh.edit_state == THRESH_EDIT_HIGH)
     {
-        high_bg = GREEN;
+        high_bg = UI_LIME;
         high_val = edit_press_high;
     }
     else if(g_press_thresh.edit_state == THRESH_EDIT_LOW)
     {
-        low_bg = GREEN;
+        low_bg = UI_LIME;
         low_val = edit_press_low;
     }
 
-    LCD_Fill(60, 100, 220, 124, WHITE);
+    LCD_Fill(65, 102, 235, 126, UI_CARD);
     POINT_COLOR = g_press_alert ? MAGENTA : BLACK;
     sprintf(buf, "%4d.%d", g_pressure / 10, abs(g_pressure % 10));
-    LCD_ShowString(60, 100, POINT_COLOR, WHITE, 16, (u8*)buf, 1);
-    LCD_ShowString(115, 100, BLACK, WHITE, 16, (u8*)"hPa", 1);
+    LCD_ShowString(65, 102, POINT_COLOR, UI_CARD, 16, (u8*)buf, 1);
+    LCD_ShowString(120, 102, BLACK, UI_CARD, 16, (u8*)"hPa", 1);
 
-    LCD_Fill(60, 150, 300, 166, high_bg);
+    FillRoundRect(65, 153, 305, 176, 8, high_bg);
     sprintf(buf, "High: >%d.%d hPa", high_val / 10, abs(high_val % 10));
-    LCD_ShowString(60, 150, BLACK, high_bg, 16, (u8*)buf, 1);
+    LCD_ShowString(75, 157, BLACK, high_bg, 16, (u8*)buf, 1);
 
-    LCD_Fill(60, 180, 300, 196, low_bg);
+    FillRoundRect(65, 184, 305, 207, 8, low_bg);
     sprintf(buf, "Low:  <%d.%d hPa", low_val / 10, abs(low_val % 10));
-    LCD_ShowString(60, 180, BLACK, low_bg, 16, (u8*)buf, 1);
+    LCD_ShowString(75, 188, BLACK, low_bg, 16, (u8*)buf, 1);
 
-    LCD_Fill(340, 100, 390, 150, WHITE);
+    LCD_Fill(340, 100, 390, 150, UI_CARD);
     if(g_press_alert)
         Gui_Drawbmp16_Custom(340, 100, ICON_PRESSBIG_W, ICON_PRESSBIG_H, gImage_highQIYA);
     else
@@ -712,9 +827,9 @@ static void PushWaveSample(void)
 {
     if(current_page == PAGE_WAVE && !need_full_refresh && wave_count > 0)
     {
-        DrawWaveSeries(wave_temp, WAVE_TEMP_MIN, WAVE_TEMP_MAX, WAVE_CHART_X, WAVE_TEMP_Y, WAVE_CHART_W, WAVE_CHART_H, WHITE);
-        DrawWaveSeries(wave_hum, WAVE_HUM_MIN, WAVE_HUM_MAX, WAVE_CHART_X, WAVE_HUM_Y, WAVE_CHART_W, WAVE_CHART_H, WHITE);
-        DrawWaveSeries(wave_press, WAVE_PRESS_MIN, WAVE_PRESS_MAX, WAVE_CHART_X, WAVE_PRESS_Y, WAVE_CHART_W, WAVE_CHART_H, WHITE);
+        DrawWaveSeries(wave_temp, WAVE_TEMP_MIN, WAVE_TEMP_MAX, WAVE_CHART_X, WAVE_TEMP_Y, WAVE_CHART_W, WAVE_CHART_H, UI_CARD);
+        DrawWaveSeries(wave_hum, WAVE_HUM_MIN, WAVE_HUM_MAX, WAVE_CHART_X, WAVE_HUM_Y, WAVE_CHART_W, WAVE_CHART_H, UI_CARD);
+        DrawWaveSeries(wave_press, WAVE_PRESS_MIN, WAVE_PRESS_MAX, WAVE_CHART_X, WAVE_PRESS_Y, WAVE_CHART_W, WAVE_CHART_H, UI_CARD);
     }
 
     wave_temp[wave_pos] = (s16)g_temp;
@@ -766,11 +881,12 @@ static void FormatValue(char *buf, s16 value, u8 unit)
 
 static void DrawWaveFrame(u16 y, u8 *name, u8 *range, u16 color, char *value)
 {
+    FillRoundRect(5, y - 4, 474, y + WAVE_CHART_H + 4, 10, UI_CARD);
     POINT_COLOR = BLACK;
-    BACK_COLOR = WHITE;
-    LCD_ShowString(8, y + 2, BLACK, WHITE, 16, name, 1);
-    LCD_ShowString(8, y + 22, color, WHITE, 16, (u8*)value, 1);
-    LCD_ShowString(8, y + 44, GRAY, WHITE, 12, range, 1);
+    BACK_COLOR = UI_CARD;
+    LCD_ShowString(12, y + 2, BLACK, UI_CARD, 16, name, 1);
+    LCD_ShowString(12, y + 22, color, UI_CARD, 16, (u8*)value, 1);
+    LCD_ShowString(12, y + 44, UI_MUTED, UI_CARD, 12, range, 1);
     LCD_DrawRectangle(WAVE_CHART_X - 1, y - 1, WAVE_CHART_X + WAVE_CHART_W, y + WAVE_CHART_H);
 }
 
@@ -808,17 +924,17 @@ static void DrawWaveDynamic(void)
 {
     char value[20];
 
-    LCD_Fill(0, WAVE_TEMP_Y, WAVE_CHART_X - 2, WAVE_TEMP_Y + WAVE_CHART_H, WHITE);
+    LCD_Fill(8, WAVE_TEMP_Y, WAVE_CHART_X - 2, WAVE_TEMP_Y + WAVE_CHART_H, UI_CARD);
     FormatValue(value, (s16)g_temp, 0);
     DrawWaveFrame(WAVE_TEMP_Y, (u8*)"Temp", (u8*)"-10..50", RED, value);
     DrawWaveSeries(wave_temp, WAVE_TEMP_MIN, WAVE_TEMP_MAX, WAVE_CHART_X, WAVE_TEMP_Y, WAVE_CHART_W, WAVE_CHART_H, RED);
 
-    LCD_Fill(0, WAVE_HUM_Y, WAVE_CHART_X - 2, WAVE_HUM_Y + WAVE_CHART_H, WHITE);
+    LCD_Fill(8, WAVE_HUM_Y, WAVE_CHART_X - 2, WAVE_HUM_Y + WAVE_CHART_H, UI_CARD);
     FormatValue(value, (s16)g_humidity, 1);
     DrawWaveFrame(WAVE_HUM_Y, (u8*)"Hum", (u8*)"0..100%", BLUE, value);
     DrawWaveSeries(wave_hum, WAVE_HUM_MIN, WAVE_HUM_MAX, WAVE_CHART_X, WAVE_HUM_Y, WAVE_CHART_W, WAVE_CHART_H, BLUE);
 
-    LCD_Fill(0, WAVE_PRESS_Y, WAVE_CHART_X - 2, WAVE_PRESS_Y + WAVE_CHART_H, WHITE);
+    LCD_Fill(8, WAVE_PRESS_Y, WAVE_CHART_X - 2, WAVE_PRESS_Y + WAVE_CHART_H, UI_CARD);
     FormatValue(value, (s16)g_pressure, 2);
     DrawWaveFrame(WAVE_PRESS_Y, (u8*)"Press", (u8*)"900..1100", MAGENTA, value);
     DrawWaveSeries(wave_press, WAVE_PRESS_MIN, WAVE_PRESS_MAX, WAVE_CHART_X, WAVE_PRESS_Y, WAVE_CHART_W, WAVE_CHART_H, MAGENTA);
@@ -826,70 +942,63 @@ static void DrawWaveDynamic(void)
 
 void DrawPage_Home(void)
 {
-    LCD_Clear(WHITE);
-    DrawTitleBar((u8*)"Environment Monitoring System");
-    
-    POINT_COLOR = BLACK;
-    BACK_COLOR = WHITE;
-    LCD_ShowString(20, 40, BLACK, WHITE, 16, (u8*)"Temperature:", 1);
-    LCD_ShowString(20, 90, BLACK, WHITE, 16, (u8*)"Humidity:", 1);
-    LCD_ShowString(20, 140, BLACK, WHITE, 16, (u8*)"Pressure:", 1);
-    
-    POINT_COLOR = RED;
-    LCD_ShowString(260, 90, RED, WHITE, 16, (u8*)"GROUP 11", 1);
-    Gui_Drawbmp16_Custom(330, 190, ICON_PEIXIAO_W, ICON_PEIXIAO_H, gImage_peixiao);
-    
-    POINT_COLOR = GRAY;
-    LCD_ShowString(60, 200, GRAY, WHITE, 16, (u8*)"Key Left/Right: switch", 1);
-    LCD_ShowString(60, 220, GRAY, WHITE, 16, (u8*)"Key Up/Down: adjust", 1);
-    LCD_ShowString(60, 240, GRAY, WHITE, 16, (u8*)"Key OK: confirm", 1);
-    
+    LCD_Clear(UI_BG);
+    DrawTitleBar((u8*)"ENVIRONMENT MONITORING SYSTEM");
+    DrawValueCard(20, 60, 198, 188, UI_ORANGE, (u8*)"TEMPERATURE");
+    DrawValueCard(222, 60, 400, 188, UI_TEAL, (u8*)"HUMIDITY");
+    DrawPressureCard();
+    Gui_Drawbmp16_Custom(417, 48, ICON_PEIXIAO_W, ICON_PEIXIAO_H, gImage_peixiao);
+    LCD_ShowString(408, 130, UI_PURPLE, UI_BG, 16, (u8*)"GROUP 11", 1);
+    LCD_ShowString(410, 156, UI_TEXT, UI_BG, 16, (u8*)"Sensor 1", 1);
+    LCD_ShowString(410, 186, UI_TEXT, UI_BG, 16, (u8*)"Sensor 2", 1);
+    LCD_ShowString(410, 216, UI_TEXT, UI_BG, 16, (u8*)"Sensor 3", 1);
     DrawHomeDynamic();
+    DrawHintBar();
     DrawNavBar();
 }
 
 void DrawPage_Temp(void)
 {
-    LCD_Clear(WHITE);
+    LCD_Clear(UI_BG);
     DrawTitleBar((u8*)"Temperature");
-
-    POINT_COLOR = GRAY;
-    LCD_ShowString(60, 230, GRAY, WHITE, 16, (u8*)"Up/Down: adjust", 1);
-    LCD_ShowString(60, 250, GRAY, WHITE, 16, (u8*)"OK: switch/confirm", 1);
-    
+    DrawCard(40, 65, 425, 222, 18, UI_ORANGE);
+    LCD_ShowString(65, 78, WHITE, UI_ORANGE, 16, (u8*)"THRESHOLD PANEL", 1);
+    DrawMiniIcon(380, 170, 0, UI_ORANGE);
+    DrawHintBar();
+     
     DrawTempDynamic();
     DrawNavBar();
 }
 
 void DrawPage_Humidity(void)
 {
-    LCD_Clear(WHITE);
+    LCD_Clear(UI_BG);
     DrawTitleBar((u8*)"Humidity");
-
-    POINT_COLOR = GRAY;
-    LCD_ShowString(60, 230, GRAY, WHITE, 16, (u8*)"Up/Down: adjust", 1);
-    LCD_ShowString(60, 250, GRAY, WHITE, 16, (u8*)"OK: switch/confirm", 1);
-    
+    DrawCard(40, 65, 425, 222, 18, UI_TEAL);
+    LCD_ShowString(65, 78, WHITE, UI_TEAL, 16, (u8*)"THRESHOLD PANEL", 1);
+    DrawMiniIcon(380, 170, 1, UI_TEAL);
+    DrawHintBar();
+     
     DrawHumidityDynamic();
     DrawNavBar();
 }
 
 void DrawPage_Pressure(void)
 {
-    LCD_Clear(WHITE);
+    LCD_Clear(UI_BG);
     DrawTitleBar((u8*)"Pressure");
-
-    POINT_COLOR = GRAY;
-    LCD_ShowString(60, 230, GRAY, WHITE, 16, (u8*)"Up/Down: adjust", 1);
-    LCD_ShowString(60, 250, GRAY, WHITE, 16, (u8*)"OK: switch/confirm", 1);
-    
+    DrawCard(40, 65, 425, 222, 18, UI_LIME);
+    LCD_ShowString(65, 78, WHITE, UI_LIME, 16, (u8*)"THRESHOLD PANEL", 1);
+    DrawMiniIcon(380, 170, 2, UI_LIME);
+    DrawHintBar();
+     
     DrawPressureDynamic();
     DrawNavBar();
 }
 
 void DrawPage_Wave(void)
 {
-    LCD_Clear(WHITE);
+    LCD_Clear(UI_BG);
     DrawTitleBar((u8*)"Wave Monitor");
     DrawWaveDynamic();
     DrawNavBar();
