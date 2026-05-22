@@ -22,6 +22,7 @@ set(MX_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Src/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Src/gpio.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Src/spi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Src/tim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Src/usart.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Src/stm32f1xx_it.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Src/stm32f1xx_hal_msp.c
@@ -45,6 +46,8 @@ set(STM32_Drivers_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c
 )
 

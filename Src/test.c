@@ -2,6 +2,7 @@
 #include "lcd.h"
 #include "GUI.h"
 #include "touch.h"
+#include "tim.h"
 #include "aht20.h"
 #include "bmp280.h"
 #include "delay.h"
@@ -46,6 +47,13 @@ static u8 key_up_pressed = 0;
 static u8 key_down_pressed = 0;
 static u8 key_ok_pressed = 0;
 
+static u8 led_alert_mode = 0;
+static u8 led_breath_duty = 0;
+static u8 led_breath_up = 1;
+static u8 led_flash_state = 0;
+static u16 led_flash_timer = 0;
+static u16 led_breath_timer = 0;
+
 #define WAVE_POINTS     80
 #define WAVE_CHART_X    108
 #define WAVE_CHART_W    360
@@ -61,12 +69,19 @@ static u8 key_ok_pressed = 0;
 #define WAVE_PRESS_MIN  9000
 #define WAVE_PRESS_MAX  11000
 
+#define LED_PWM_PERIOD          999
+#define LED_BREATH_UPDATE_MS    10
+#define LED_BREATH_STEP_MS      20
+#define LED_FLASH_INTERVAL_MS   250
+
 static s16 wave_temp[WAVE_POINTS];
 static s16 wave_hum[WAVE_POINTS];
 static s16 wave_press[WAVE_POINTS];
 static u8 wave_count = 0;
 static u8 wave_pos = 0;
 
+static void LED_SetDuty(u16 duty);
+static void LED_RefreshMode(void);
 static void DrawWaveSeries(s16 *data, s16 min, s16 max, u16 x, u16 y, u16 w, u16 h, u16 color);
 
 static void RequestPartialRefresh(void)
@@ -112,20 +127,83 @@ static void FinishRefresh(void)
 
 void LED_Init(void)
 {
-    HAL_GPIO_WritePin(LED_GPIO_PORT, LED_GREEN_PIN | LED_RED_PIN, GPIO_PIN_SET);
+    LED_SetDuty(0);
+    if(HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3) != HAL_OK)
+    {
+        Error_Handler();
+    }
 }
 
-void LED_Control(u8 green_on, u8 red_on)
+static void LED_SetDuty(u16 duty)
 {
-    if(green_on)
-        HAL_GPIO_WritePin(LED_GPIO_PORT, LED_GREEN_PIN, GPIO_PIN_RESET);
+    if(duty > LED_PWM_PERIOD) duty = LED_PWM_PERIOD;
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, duty);
+}
+
+static void LED_SetAlertMode(u8 alert)
+{
+    alert = alert ? 1 : 0;
+    if(led_alert_mode == alert) return;
+
+    led_alert_mode = alert;
+    led_flash_state = 0;
+    led_flash_timer = 0;
+    if(alert)
+    {
+        LED_SetDuty(0);
+    }
+}
+
+static void LED_RefreshMode(void)
+{
+    LED_SetAlertMode(g_temp_alert || g_hum_alert || g_press_alert);
+}
+
+static void LED_Update(void)
+{
+    if(led_alert_mode)
+    {
+        led_flash_timer += LED_BREATH_UPDATE_MS;
+        if(led_flash_timer >= LED_FLASH_INTERVAL_MS)
+        {
+            led_flash_timer = 0;
+            led_flash_state = !led_flash_state;
+        }
+        LED_SetDuty(led_flash_state ? LED_PWM_PERIOD : 0);
+        return;
+    }
+
+    led_breath_timer += LED_BREATH_UPDATE_MS;
+    if(led_breath_timer < LED_BREATH_STEP_MS)
+    {
+        return;
+    }
+    led_breath_timer = 0;
+
+    if(led_breath_up)
+    {
+        if(led_breath_duty < 100)
+        {
+            led_breath_duty++;
+        }
+        else
+        {
+            led_breath_up = 0;
+        }
+    }
     else
-        HAL_GPIO_WritePin(LED_GPIO_PORT, LED_GREEN_PIN, GPIO_PIN_SET);
-    
-    if(red_on)
-        HAL_GPIO_WritePin(LED_GPIO_PORT, LED_RED_PIN, GPIO_PIN_RESET);
-    else
-        HAL_GPIO_WritePin(LED_GPIO_PORT, LED_RED_PIN, GPIO_PIN_SET);
+    {
+        if(led_breath_duty > 0)
+        {
+            led_breath_duty--;
+        }
+        else
+        {
+            led_breath_up = 1;
+        }
+    }
+
+    LED_SetDuty(((u16)led_breath_duty * LED_PWM_PERIOD) / 100);
 }
 
 /* ========== 按键初始化 ========== */
@@ -213,6 +291,7 @@ static void ApplyTempThreshold(void)
         last_temp_alert = g_temp_alert;
         RequestPartialRefresh();
     }
+    LED_RefreshMode();
 }
 
 static void ApplyHumThreshold(void)
@@ -223,6 +302,7 @@ static void ApplyHumThreshold(void)
         last_hum_alert = g_hum_alert;
         RequestPartialRefresh();
     }
+    LED_RefreshMode();
 }
 
 static void ApplyPressThreshold(void)
@@ -233,6 +313,7 @@ static void ApplyPressThreshold(void)
         last_press_alert = g_press_alert;
         RequestPartialRefresh();
     }
+    LED_RefreshMode();
 }
 
 static void ExitEditAndApply(void)
@@ -1114,15 +1195,7 @@ void UpdateSensorData(void)
         RequestPartialRefresh();
     }
     
-    // LED报警控制
-    if(g_temp_alert || g_hum_alert || g_press_alert)
-    {
-        LED_Control(0, 1);  // 红灯亮
-    }
-    else
-    {
-        LED_Control(1, 0);  // 绿灯亮
-    }
+    LED_RefreshMode();
 }
 
 /* ========== 主函数 ========== */
@@ -1160,20 +1233,21 @@ void main_test(void)
             }
         }
         
-        // 3. 定时读取传感器（每2秒），只在首页自动刷新
+        // 3. 定时读取传感器（每2秒），只在首页和波形页自动刷新
         sensor_timer += 10;
-    if(sensor_timer >= 2000)
-    {
-        UpdateSensorData();
-        sensor_timer = 0;
-        if(current_page == PAGE_HOME || current_page == PAGE_WAVE)
+        if(sensor_timer >= 2000)
         {
-            RequestPartialRefresh();
-        }
+            UpdateSensorData();
+            sensor_timer = 0;
+            if(current_page == PAGE_HOME || current_page == PAGE_WAVE)
+            {
+                RequestPartialRefresh();
+            }
         }
         
         // 4. 刷新页面
         RefreshPage();
+        LED_Update();
         
         delay_ms(10);
     }

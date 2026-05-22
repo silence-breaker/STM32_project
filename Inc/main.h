@@ -79,10 +79,8 @@ void Error_Handler(void);
 #define KEY_RIGHT_GPIO_Port GPIOA
 #define KEY_UP_Pin GPIO_PIN_4
 #define KEY_UP_GPIO_Port GPIOA
-#define LED_GREEN_Pin GPIO_PIN_0
-#define LED_GREEN_GPIO_Port GPIOB
-#define LED_RED_Pin GPIO_PIN_1
-#define LED_RED_GPIO_Port GPIOB
+#define LED_STATUS_Pin GPIO_PIN_0
+#define LED_STATUS_GPIO_Port GPIOB
 #define AHT2_SCL_Pin GPIO_PIN_10
 #define AHT2_SCL_GPIO_Port GPIOB
 #define AHT20_SDA_Pin GPIO_PIN_11
@@ -141,9 +139,8 @@ void Error_Handler(void);
 #define KEY_DOWN_PORT       KEY_DOWN_GPIO_Port
 #define KEY_OK_PORT         KEY_OK_GPIO_Port
 
-#define LED_GREEN_PIN       LED_GREEN_Pin
-#define LED_RED_PIN         LED_RED_Pin
-#define LED_GPIO_PORT       GPIOB
+#define LED_STATUS_PIN      LED_STATUS_Pin
+#define LED_GPIO_PORT       LED_STATUS_GPIO_Port
 
 #define KEY_DEBOUNCE_MS     20
 #define KEY_REPEAT_INTERVAL 200

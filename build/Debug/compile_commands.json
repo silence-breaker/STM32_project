@@ -19,6 +19,12 @@
 },
 {
   "directory": "F:/stm32cubemx/project/4inch_cubeproject/build/Debug",
+  "command": "F:\\st-stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\arm-none-eabi-gcc.exe -DDEBUG -DSTM32F103xB -DUSE_HAL_DRIVER -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32F1xx/Include -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Include  -mcpu=cortex-m3  -Wall -fdata-sections -ffunction-sections -fstack-usage -O0 -g3 -std=gnu11 -Os -o CMakeFiles\\4inch_cubeproject.dir\\Src\\tim.c.obj -c F:\\stm32cubemx\\project\\4inch_cubeproject\\Src\\tim.c",
+  "file": "F:\\stm32cubemx\\project\\4inch_cubeproject\\Src\\tim.c",
+  "output": "CMakeFiles\\4inch_cubeproject.dir\\Src\\tim.c.obj"
+},
+{
+  "directory": "F:/stm32cubemx/project/4inch_cubeproject/build/Debug",
   "command": "F:\\st-stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\arm-none-eabi-gcc.exe -DDEBUG -DSTM32F103xB -DUSE_HAL_DRIVER -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32F1xx/Include -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Include  -mcpu=cortex-m3  -Wall -fdata-sections -ffunction-sections -fstack-usage -O0 -g3 -std=gnu11 -Os -o CMakeFiles\\4inch_cubeproject.dir\\Src\\usart.c.obj -c F:\\stm32cubemx\\project\\4inch_cubeproject\\Src\\usart.c",
   "file": "F:\\stm32cubemx\\project\\4inch_cubeproject\\Src\\usart.c",
   "output": "CMakeFiles\\4inch_cubeproject.dir\\Src\\usart.c.obj"
@@ -208,6 +214,18 @@
   "command": "F:\\st-stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\arm-none-eabi-gcc.exe -DDEBUG -DSTM32F103xB -DUSE_HAL_DRIVER -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32F1xx/Include -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Include  -mcpu=cortex-m3  -Wall -fdata-sections -ffunction-sections -fstack-usage -O0 -g3 -std=gnu11 -Os -o cmake\\stm32cubemx\\CMakeFiles\\STM32_Drivers.dir\\__\\__\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_exti.c.obj -c F:\\stm32cubemx\\project\\4inch_cubeproject\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_exti.c",
   "file": "F:\\stm32cubemx\\project\\4inch_cubeproject\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_exti.c",
   "output": "cmake\\stm32cubemx\\CMakeFiles\\STM32_Drivers.dir\\__\\__\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_exti.c.obj"
+},
+{
+  "directory": "F:/stm32cubemx/project/4inch_cubeproject/build/Debug",
+  "command": "F:\\st-stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\arm-none-eabi-gcc.exe -DDEBUG -DSTM32F103xB -DUSE_HAL_DRIVER -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32F1xx/Include -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Include  -mcpu=cortex-m3  -Wall -fdata-sections -ffunction-sections -fstack-usage -O0 -g3 -std=gnu11 -Os -o cmake\\stm32cubemx\\CMakeFiles\\STM32_Drivers.dir\\__\\__\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim.c.obj -c F:\\stm32cubemx\\project\\4inch_cubeproject\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim.c",
+  "file": "F:\\stm32cubemx\\project\\4inch_cubeproject\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim.c",
+  "output": "cmake\\stm32cubemx\\CMakeFiles\\STM32_Drivers.dir\\__\\__\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim.c.obj"
+},
+{
+  "directory": "F:/stm32cubemx/project/4inch_cubeproject/build/Debug",
+  "command": "F:\\st-stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\arm-none-eabi-gcc.exe -DDEBUG -DSTM32F103xB -DUSE_HAL_DRIVER -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Device/ST/STM32F1xx/Include -IF:/stm32cubemx/project/4inch_cubeproject/cmake/stm32cubemx/../../Drivers/CMSIS/Include  -mcpu=cortex-m3  -Wall -fdata-sections -ffunction-sections -fstack-usage -O0 -g3 -std=gnu11 -Os -o cmake\\stm32cubemx\\CMakeFiles\\STM32_Drivers.dir\\__\\__\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim_ex.c.obj -c F:\\stm32cubemx\\project\\4inch_cubeproject\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim_ex.c",
+  "file": "F:\\stm32cubemx\\project\\4inch_cubeproject\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim_ex.c",
+  "output": "cmake\\stm32cubemx\\CMakeFiles\\STM32_Drivers.dir\\__\\__\\Drivers\\STM32F1xx_HAL_Driver\\Src\\stm32f1xx_hal_tim_ex.c.obj"
 },
 {
   "directory": "F:/stm32cubemx/project/4inch_cubeproject/build/Debug",

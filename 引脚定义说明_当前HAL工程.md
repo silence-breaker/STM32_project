@@ -1,6 +1,6 @@
 # 当前 HAL 工程引脚定义说明
 
-生成日期：2026-05-21  
+生成日期：2026-05-22  
 适用工程：`F:/stm32cubemx/project/4inch_cubeproject`  
 目标芯片：`STM32F103C8Tx`，LQFP48
 
@@ -18,7 +18,7 @@
 - `Src/stm32f1xx_hal_msp.c`
 - `STM32F103XX_FLASH.ld`
 
-旧版 `引脚定义说明_V2.md` 不再作为依据。按键与 LED 定义已与原标准库工程 `F:/stm32cubemx/project/system/user/main.h` 对齐。
+旧版 `引脚定义说明_V2.md` 不再作为依据。当前引脚定义以 CubeMX 重新生成后的 `Inc/main.h` 为准。
 
 ## 关键注意事项
 
@@ -27,7 +27,7 @@
 - `PA13`、`PA14` 用于 SWD 调试，不要改作普通 GPIO。
 - `PB3`、`PB4` 已释放给触摸屏使用，因此 CubeMX 中必须关闭 JTAG，仅保留 Serial Wire。
 - 按键为低电平有效，内部上拉输入。
-- LED 为低电平点亮，默认输出高电平熄灭。
+- LED 状态灯使用 `LED_STATUS`，由 `TIM3_CH3` 输出 PWM；硬件为低电平点亮。
 - LCD 片选 `LCD_CS` 低有效，触摸片选 `TP_CS` 低有效。
 - LCD 背光 `LCD_LED` 当前按高电平打开处理。
 
@@ -131,14 +131,24 @@ BMP280 复用 AHT20 的软件 I2C 底层，因此 BMP280 也使用 `PB10/PB11`�
 
 ## LED 引脚
 
-LED 为低电平点亮，默认初始化为高电平熄灭。
+状态 LED 只保留一个 CubeMX label：`LED_STATUS`。硬件为低电平点亮，当前通过 `TIM3_CH3` 的低有效 PWM 输出实现呼吸灯和异常闪烁。
 
-| 引脚 | CubeMX 标签 | HAL 宏 | 兼容业务宏 | 用途 | 初始电平 |
+| 引脚 | CubeMX 信号/标签 | HAL 宏 | 兼容业务宏 | 用途 | 配置/说明 |
 | --- | --- | --- | --- | --- | --- |
-| `PB0` | `LED_GREEN` | `LED_GREEN_Pin` / `LED_GREEN_GPIO_Port` | `LED_GREEN_PIN` / `LED_GPIO_PORT` | 绿灯 | `GPIO_PIN_SET` |
-| `PB1` | `LED_RED` | `LED_RED_Pin` / `LED_RED_GPIO_Port` | `LED_RED_PIN` / `LED_GPIO_PORT` | 红灯 | `GPIO_PIN_SET` |
+| `PB0` | `S_TIM3_CH3` / `LED_STATUS` | `LED_STATUS_Pin` / `LED_STATUS_GPIO_Port` | `LED_STATUS_PIN` / `LED_GPIO_PORT` | 状态 LED | `TIM3_CH3 PWM`，复用推挽输出 |
 
-业务代码中 `LED_Control()` 采用 `GPIO_PIN_RESET` 点亮、`GPIO_PIN_SET` 熄灭。
+TIM3 当前配置：
+
+- `Prescaler = 71`
+- `Period = 999`
+- `Channel = TIM_CHANNEL_3`
+- `OCPolarity = TIM_OCPOLARITY_LOW`
+
+业务逻辑：
+
+- 正常状态：`LED_Update()` 周期性调整 `TIM3_CCR3`，显示呼吸灯。
+- 异常状态：温度、湿度或气压任一告警时，`LED_Update()` 在 `0/999` 占空比之间切换，显示闪烁。
+- 业务代码不再使用旧的 `LED_GREEN` / `LED_RED` 双 LED 控制。
 
 ## USART1 引脚
 
@@ -154,7 +164,8 @@ LED 为低电平点亮，默认初始化为高电平熄灭。
 | 引脚组 | 模式 | 上拉/速度 | 初始状态 |
 | --- | --- | --- | --- |
 | `TP_IRQ`、`TP_DO`、`KEY_LEFT`、`KEY_RIGHT`、`KEY_UP`、`KEY_DOWN`、`KEY_OK` | 输入 | 上拉 | 无输出状态 |
-| `LED_GREEN`、`LED_RED`、`TP_DIN`、`TP_CS`、`LCD_CS` | 推挽输出 | 默认速度 | `GPIO_PIN_SET` |
+| `LED_STATUS` | 复用推挽输出 | 低速 | `TIM3_CH3 PWM`，低有效 |
+| `TP_DIN`、`TP_CS`、`LCD_CS` | 推挽输出 | 默认速度 | `GPIO_PIN_SET` |
 | `AHT2_SCL`、`AHT20_SDA` | 推挽输出 | 上拉，高速 | `GPIO_PIN_SET` |
 | `TP_CLK` | 推挽输出 | 高速 | `GPIO_PIN_RESET` |
 | `LCD_LED`、`LCD_DC` | 推挽输出 | 中速 | `GPIO_PIN_SET` |
@@ -170,4 +181,4 @@ LED 为低电平点亮，默认初始化为高电平熄灭。
 - `PA0/PA1/PB3/PB4/PA8` 保持为触摸屏软件时序引脚。
 - `PB10/PB11` 保持为 AHT20/BMP280 共用软件 I2C。
 - `PA2/PA3/PA4/PA11/PA12` 保持输入上拉，用于低有效按键。
-- `PB0/PB1` 保持输出高电平默认熄灭，用于低有效 LED。
+- `PB0` 配置为 `TIM3_CH3`，GPIO label 为 `LED_STATUS`，不要再配置 `PB1` 作为状态 LED。

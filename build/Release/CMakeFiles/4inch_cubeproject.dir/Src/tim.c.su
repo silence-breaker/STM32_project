@@ -1,0 +1,4 @@
+F:/stm32cubemx/project/4inch_cubeproject/Src/tim.c:84:6:HAL_TIM_Base_MspInit	8	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/tim.c:99:6:HAL_TIM_MspPostInit	32	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/tim.c:30:6:MX_TIM3_Init	64	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/tim.c:125:6:HAL_TIM_Base_MspDeInit	0	static
