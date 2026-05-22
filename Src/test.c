@@ -67,6 +67,8 @@ static s16 wave_press[WAVE_POINTS];
 static u8 wave_count = 0;
 static u8 wave_pos = 0;
 
+static void DrawWaveSeries(s16 *data, s16 min, s16 max, u16 x, u16 y, u16 w, u16 h, u16 color);
+
 static void RequestPartialRefresh(void)
 {
     need_refresh = 1;
@@ -627,6 +629,13 @@ static void DrawPressureDynamic(void)
 
 static void PushWaveSample(void)
 {
+    if(current_page == PAGE_WAVE && !need_full_refresh && wave_count > 0)
+    {
+        DrawWaveSeries(wave_temp, WAVE_TEMP_MIN, WAVE_TEMP_MAX, WAVE_CHART_X, WAVE_TEMP_Y, WAVE_CHART_W, WAVE_CHART_H, WHITE);
+        DrawWaveSeries(wave_hum, WAVE_HUM_MIN, WAVE_HUM_MAX, WAVE_CHART_X, WAVE_HUM_Y, WAVE_CHART_W, WAVE_CHART_H, WHITE);
+        DrawWaveSeries(wave_press, WAVE_PRESS_MIN, WAVE_PRESS_MAX, WAVE_CHART_X, WAVE_PRESS_Y, WAVE_CHART_W, WAVE_CHART_H, WHITE);
+    }
+
     wave_temp[wave_pos] = (s16)g_temp;
     wave_hum[wave_pos] = (s16)g_humidity;
     wave_press[wave_pos] = (s16)g_pressure;
@@ -687,24 +696,26 @@ static void DrawWaveFrame(u16 y, u8 *name, u8 *range, u16 color, char *value)
 static void DrawWaveSeries(s16 *data, s16 min, s16 max, u16 x, u16 y, u16 w, u16 h, u16 color)
 {
     u8 i;
+    u8 first_slot;
     u16 last_x, last_y, px, py;
 
     if(wave_count == 0) return;
+    first_slot = WAVE_POINTS - wave_count;
 
     POINT_COLOR = color;
     if(wave_count == 1)
     {
-        px = x + w - 1;
+        px = x + ((u32)(WAVE_POINTS - 1) * (w - 1)) / (WAVE_POINTS - 1);
         py = ScaleWaveY(data[WaveDataIndex(0)], min, max, y, h);
-        LCD_DrawLine(px, py, px + 1, py);
+        LCD_DrawLine(px - 1, py, px, py);
         return;
     }
 
-    last_x = x;
+    last_x = x + ((u32)first_slot * (w - 1)) / (WAVE_POINTS - 1);
     last_y = ScaleWaveY(data[WaveDataIndex(0)], min, max, y, h);
     for(i = 1; i < wave_count; i++)
     {
-        px = x + ((u32)i * (w - 1)) / (WAVE_POINTS - 1);
+        px = x + ((u32)(first_slot + i) * (w - 1)) / (WAVE_POINTS - 1);
         py = ScaleWaveY(data[WaveDataIndex(i)], min, max, y, h);
         LCD_DrawLine(last_x, last_y, px, py);
         last_x = px;
@@ -716,17 +727,17 @@ static void DrawWaveDynamic(void)
 {
     char value[20];
 
-    LCD_Fill(0, WAVE_TEMP_Y, WAVE_CHART_X + WAVE_CHART_W, WAVE_TEMP_Y + WAVE_CHART_H + 1, WHITE);
+    LCD_Fill(0, WAVE_TEMP_Y, WAVE_CHART_X - 2, WAVE_TEMP_Y + WAVE_CHART_H, WHITE);
     FormatValue(value, (s16)g_temp, 0);
     DrawWaveFrame(WAVE_TEMP_Y, (u8*)"Temp", (u8*)"-10..50", RED, value);
     DrawWaveSeries(wave_temp, WAVE_TEMP_MIN, WAVE_TEMP_MAX, WAVE_CHART_X, WAVE_TEMP_Y, WAVE_CHART_W, WAVE_CHART_H, RED);
 
-    LCD_Fill(0, WAVE_HUM_Y, WAVE_CHART_X + WAVE_CHART_W, WAVE_HUM_Y + WAVE_CHART_H + 1, WHITE);
+    LCD_Fill(0, WAVE_HUM_Y, WAVE_CHART_X - 2, WAVE_HUM_Y + WAVE_CHART_H, WHITE);
     FormatValue(value, (s16)g_humidity, 1);
     DrawWaveFrame(WAVE_HUM_Y, (u8*)"Hum", (u8*)"0..100%", BLUE, value);
     DrawWaveSeries(wave_hum, WAVE_HUM_MIN, WAVE_HUM_MAX, WAVE_CHART_X, WAVE_HUM_Y, WAVE_CHART_W, WAVE_CHART_H, BLUE);
 
-    LCD_Fill(0, WAVE_PRESS_Y, WAVE_CHART_X + WAVE_CHART_W, WAVE_PRESS_Y + WAVE_CHART_H + 1, WHITE);
+    LCD_Fill(0, WAVE_PRESS_Y, WAVE_CHART_X - 2, WAVE_PRESS_Y + WAVE_CHART_H, WHITE);
     FormatValue(value, (s16)g_pressure, 2);
     DrawWaveFrame(WAVE_PRESS_Y, (u8*)"Press", (u8*)"900..1100", MAGENTA, value);
     DrawWaveSeries(wave_press, WAVE_PRESS_MIN, WAVE_PRESS_MAX, WAVE_CHART_X, WAVE_PRESS_Y, WAVE_CHART_W, WAVE_CHART_H, MAGENTA);

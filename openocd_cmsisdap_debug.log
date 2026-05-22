@@ -1,0 +1,94 @@
+Open On-Chip Debugger 0.12.0 (2026-03-02) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Debug: 4 5 options.c:357 parse_cmdline_args(): ARGV[0] = "F:\OpenOCD-20260302-0.12.0\bin\openocd.exe"
+Debug: 5 5 options.c:357 parse_cmdline_args(): ARGV[1] = "-d4"
+Debug: 6 5 options.c:357 parse_cmdline_args(): ARGV[2] = "-f"
+Debug: 7 5 options.c:357 parse_cmdline_args(): ARGV[3] = "F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/interface/cmsis-dap.cfg"
+Debug: 8 5 options.c:357 parse_cmdline_args(): ARGV[4] = "-c"
+Debug: 9 5 options.c:357 parse_cmdline_args(): ARGV[5] = "cmsis-dap backend hid"
+Debug: 10 6 options.c:357 parse_cmdline_args(): ARGV[6] = "-c"
+Debug: 11 6 options.c:357 parse_cmdline_args(): ARGV[7] = "transport select swd"
+Debug: 12 6 options.c:357 parse_cmdline_args(): ARGV[8] = "-f"
+Debug: 13 7 options.c:357 parse_cmdline_args(): ARGV[9] = "F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/target/stm32f1x.cfg"
+Debug: 14 7 options.c:357 parse_cmdline_args(): ARGV[10] = "-c"
+Debug: 15 7 options.c:357 parse_cmdline_args(): ARGV[11] = "init; shutdown"
+Debug: 16 7 options.c:234 add_default_dirs(): bindir=../../bin
+Debug: 17 7 options.c:235 add_default_dirs(): pkgdatadir=../../share/openocd
+Debug: 18 8 options.c:236 add_default_dirs(): exepath=F:/OpenOCD-20260302-0.12.0/bin
+Debug: 19 8 options.c:237 add_default_dirs(): bin2data=../share/openocd
+Debug: 20 8 configuration.c:33 add_script_search_dir(): adding C:/Users/24779/AppData/Roaming/OpenOCD
+Debug: 21 8 configuration.c:33 add_script_search_dir(): adding F:/OpenOCD-20260302-0.12.0/bin/../share/openocd/site
+Debug: 22 8 configuration.c:33 add_script_search_dir(): adding F:/OpenOCD-20260302-0.12.0/bin/../share/openocd/scripts
+Debug: 23 9 command.c:82 script_debug(): command - ocd_find F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/interface/cmsis-dap.cfg
+Debug: 24 9 configuration.c:89 find_file(): found F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/interface/cmsis-dap.cfg
+Debug: 25 12 command.c:82 script_debug(): command - adapter driver cmsis-dap
+Debug: 26 12 command.c:82 script_debug(): command - cmsis-dap backend hid
+Debug: 27 13 command.c:82 script_debug(): command - transport select swd
+Debug: 28 13 command.c:82 script_debug(): command - ocd_find F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/target/stm32f1x.cfg
+Debug: 29 13 configuration.c:89 find_file(): found F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/target/stm32f1x.cfg
+Debug: 30 14 command.c:82 script_debug(): command - ocd_find target/swj-dp.tcl
+Debug: 31 14 configuration.c:89 find_file(): found F:/OpenOCD-20260302-0.12.0/bin/../share/openocd/scripts/target/swj-dp.tcl
+Debug: 32 15 command.c:82 script_debug(): command - transport select
+Debug: 33 15 command.c:82 script_debug(): command - ocd_find mem_helper.tcl
+Debug: 34 15 configuration.c:89 find_file(): found F:/OpenOCD-20260302-0.12.0/bin/../share/openocd/scripts/mem_helper.tcl
+Debug: 35 16 command.c:82 script_debug(): command - add_usage_text mrw address
+Debug: 36 16 command.c:82 script_debug(): command - add_help_text mrw Returns value of word in memory.
+Debug: 37 16 command.c:82 script_debug(): command - add_usage_text mrh address
+Debug: 38 16 command.c:82 script_debug(): command - add_help_text mrh Returns value of halfword in memory.
+Debug: 39 17 command.c:82 script_debug(): command - add_usage_text mrb address
+Debug: 40 17 command.c:82 script_debug(): command - add_help_text mrb Returns value of byte in memory.
+Debug: 41 17 command.c:82 script_debug(): command - add_usage_text mmw address setbits clearbits
+Debug: 42 17 command.c:82 script_debug(): command - add_help_text mmw Modify word in memory. new_val = (old_val & ~clearbits) | setbits;
+Debug: 43 17 command.c:82 script_debug(): command - transport select
+Debug: 44 18 command.c:82 script_debug(): command - transport select
+Debug: 45 18 command.c:82 script_debug(): command - transport select
+Debug: 46 18 command.c:82 script_debug(): command - swd newdap stm32f1x cpu -irlen 4 -ircapture 0x1 -irmask 0xf -expected-id 0x1ba01477
+Debug: 47 18 tcl.c:404 handle_jtag_newtap_args(): Creating New Tap, Chip: stm32f1x, Tap: cpu, Dotted: stm32f1x.cpu, 8 params
+Debug: 48 18 core.c:1488 jtag_tap_init(): Created Tap: stm32f1x.cpu @ abs position 0, irlen 4, capture: 0x1 mask: 0xf
+Debug: 49 18 command.c:82 script_debug(): command - dap create stm32f1x.dap -chain-position stm32f1x.cpu
+Debug: 50 18 command.c:82 script_debug(): command - transport select
+Debug: 51 19 command.c:82 script_debug(): command - target create stm32f1x.cpu cortex_m -endian little -dap stm32f1x.dap
+Debug: 52 19 command.c:187 register_command(): command 'tpiu' is already registered
+Debug: 53 19 command.c:187 register_command(): command 'rtt' is already registered
+Debug: 54 19 command.c:82 script_debug(): command - stm32f1x.cpu configure -work-area-phys 0x20000000 -work-area-size 0x1000 -work-area-backup 0
+Debug: 55 19 target.c:2158 target_free_all_working_areas_restore(): freeing all working areas
+Debug: 56 20 target.c:2158 target_free_all_working_areas_restore(): freeing all working areas
+Debug: 57 20 target.c:2158 target_free_all_working_areas_restore(): freeing all working areas
+Debug: 58 20 command.c:82 script_debug(): command - flash bank stm32f1x.flash stm32f1x 0x08000000 0 0 0 stm32f1x.cpu
+Debug: 59 20 tcl.c:1433 handle_flash_bank_command(): 'stm32f1x' driver usage field missing
+Debug: 60 21 command.c:82 script_debug(): command - adapter speed 1000
+Debug: 61 21 adapter.c:254 adapter_config_khz(): handle adapter khz
+Debug: 62 21 adapter.c:217 adapter_khz_to_speed(): convert khz to adapter specific speed value
+Debug: 63 21 adapter.c:217 adapter_khz_to_speed(): convert khz to adapter specific speed value
+Debug: 64 21 command.c:82 script_debug(): command - adapter srst delay 100
+Debug: 65 21 command.c:82 script_debug(): command - transport select
+Debug: 66 21 command.c:82 script_debug(): command - reset_config srst_nogate
+Debug: 67 22 command.c:82 script_debug(): command - transport select
+Debug: 68 22 command.c:82 script_debug(): command - cortex_m reset_config sysresetreq
+Debug: 69 22 command.c:82 script_debug(): command - stm32f1x.cpu configure -event examine-end 
+	# DBGMCU_CR |= DBG_WWDG_STOP | DBG_IWDG_STOP |
+	#              DBG_STANDBY | DBG_STOP | DBG_SLEEP
+	mmw 0xE0042004 0x00000307 0
+
+Debug: 70 22 command.c:82 script_debug(): command - tpiu create stm32f1x.tpiu -dap stm32f1x.dap -ap-num 0 -baseaddr 0xE0040000
+Debug: 71 23 command.c:82 script_debug(): command - stm32f1x.tpiu configure -event pre-enable _proc_pre_enable_stm32f1x.tpiu stm32f1x.cpu
+Debug: 72 23 command.c:82 script_debug(): command - init
+Debug: 73 23 command.c:82 script_debug(): command - target init
+Debug: 74 23 command.c:82 script_debug(): command - target names
+Debug: 75 23 command.c:82 script_debug(): command - stm32f1x.cpu cget -event gdb-flash-erase-start
+Debug: 76 23 command.c:82 script_debug(): command - stm32f1x.cpu configure -event gdb-flash-erase-start reset init
+Debug: 77 24 command.c:82 script_debug(): command - stm32f1x.cpu cget -event gdb-flash-write-end
+Debug: 78 24 command.c:82 script_debug(): command - stm32f1x.cpu configure -event gdb-flash-write-end reset halt
+Debug: 79 24 command.c:82 script_debug(): command - stm32f1x.cpu cget -event gdb-attach
+Debug: 80 24 command.c:82 script_debug(): command - stm32f1x.cpu configure -event gdb-attach halt 1000
+Debug: 81 24 target.c:1616 handle_target_init_command(): Initializing targets...
+Debug: 82 25 semihosting_common.c:111 semihosting_common_init():  
+Error: 83 6086 cmsis_dap.c:467 cmsis_dap_cmd_dap_info(): CMSIS-DAP command CMD_INFO failed.
+Debug: 84 6086 command.c:463 jim_exec_command(): Command 'init' failed with error code -107
+User : 85 6087 command.c:548 command_run_line(): 
+Debug: 86 6087 breakpoints.c:330 breakpoint_remove_all_internal(): [stm32f1x.cpu] Delete all breakpoints
+Debug: 87 6087 breakpoints.c:417 watchpoint_remove_all_internal(): [stm32f1x.cpu] Delete all watchpoints
+Debug: 88 6087 target.c:2158 target_free_all_working_areas_restore(): freeing all working areas
