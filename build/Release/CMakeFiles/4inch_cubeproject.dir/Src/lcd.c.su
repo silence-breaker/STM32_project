@@ -1,0 +1,13 @@
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:60:6:LCD_WR_REG	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:75:6:LCD_WR_DATA	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:91:6:LCD_WriteReg	8	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:104:6:LCD_WriteRAM_Prepare	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:116:6:Lcd_WriteData_16Bit	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:171:6:LCD_GPIOInit	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:182:6:LCD_RESET	8	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:302:6:LCD_SetWindows	24	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:148:6:LCD_Clear	24	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:327:6:LCD_SetCursor	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:135:6:LCD_DrawPoint	8	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:342:6:LCD_direction	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/lcd.c:197:6:LCD_Init	8	static

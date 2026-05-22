@@ -1,0 +1,15 @@
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:59:13:TP_DIN_Write	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:64:13:TP_CLK_Write	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:122:6:TP_Write_Byte	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:145:5:TP_Read_AD	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:198:5:TP_Read_XOY	40	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:232:4:TP_Read_XY	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:266:4:TP_Read_XY2	32	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:333:4:TP_Scan	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:293:6:TP_Drow_Touch_Point	40	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:314:6:TP_Draw_Big_Point	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:379:6:TP_Save_Adjdata	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:417:4:TP_Get_Adjdata	40	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:490:6:TP_Adj_Info_Show	72	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:520:6:TP_Adjust	112	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/touch.c:683:4:TP_Init	48	static

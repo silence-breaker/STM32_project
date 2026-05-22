@@ -1,0 +1,4 @@
+F:/stm32cubemx/project/4inch_cubeproject/Src/delay.c:3:6:Sys_Delay_Init	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/delay.c:7:6:delay_ms	0	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/delay.c:12:6:delay_us	8	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/delay.c:21:6:NVIC_Configuration	0	static

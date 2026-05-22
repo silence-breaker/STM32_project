@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "DAP-Link",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "serverpath": "F:/OpenOCD-20260302-0.12.0/bin/openocd.exe",
+            "cwd": "${workspaceFolder}",
+            "executable": "${command:cmake.launchTargetPath}",
+            "device": "STM32F103C8Tx",
+            "configFiles": [
+                "F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/interface/cmsis-dap.cfg",
+                "F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/target/stm32f1x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "raw",
+            "svdFile": "F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/STMicroelectronics_CMSIS_SVD/STM32F103.svd",
+            "preLaunchTask": "CMake: build"
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "CMake: configure Debug",
+			"type": "process",
+			"command": "F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/CMake/bin/cmake.exe",
+			"args": [
+				"--preset",
+				"Debug"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"env": {
+					"PATH": "F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/CMake/bin;F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/Ninja/bin;F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/GNU-tools-for-STM32/bin;${env:PATH}"
+				}
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			},
+			"detail": "Configure Debug preset explicitly before build/flash"
+		},
+		{
+			"label": "CMake: build",
+			"type": "process",
+			"command": "F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/CMake/bin/cmake.exe",
+			"args": [
+				"--build",
+				"--preset",
+				"Debug"
+			],
+			"dependsOn": "CMake: configure Debug",
+			"dependsOrder": "sequence",
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"env": {
+					"PATH": "F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/CMake/bin;F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/Ninja/bin;F:/st-stm32cubeclt/STM32CubeCLT_1.21.0/GNU-tools-for-STM32/bin;${env:PATH}"
+				}
+			},
+			"group": "build",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			},
+			"detail": "Build Debug preset explicitly with CubeCLT CMake"
+		},
+		{
+			"label": "DAP-Link: flash",
+			"type": "process",
+			"command": "F:/OpenOCD-20260302-0.12.0/bin/openocd.exe",
+			"args": [
+				"-f",
+				"F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/interface/cmsis-dap.cfg",
+				"-c",
+				"transport select swd",
+				"-f",
+				"F:/OpenOCD-20260302-0.12.0/share/openocd/scripts/target/stm32f1x.cfg",
+				"-c",
+				"program build/Debug/4inch_cubeproject.elf verify reset exit"
+			],
+			"dependsOn": "CMake: build",
+			"dependsOrder": "sequence",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			},
+			"detail": "Build and flash STM32F103C8Tx through DAP-Link/CMSIS-DAP with OpenOCD"
+		}
+	]
+}

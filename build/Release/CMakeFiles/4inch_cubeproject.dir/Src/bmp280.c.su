@@ -1,0 +1,3 @@
+F:/stm32cubemx/project/4inch_cubeproject/Src/bmp280.c:7:13:BMP280_WriteReg	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/bmp280.c:83:6:BMP280_Init	40	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/bmp280.c:130:4:BMP280_GetPressure	32	static

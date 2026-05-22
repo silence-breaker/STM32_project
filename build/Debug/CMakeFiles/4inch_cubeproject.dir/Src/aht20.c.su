@@ -1,0 +1,9 @@
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:10:6:AHT20_Start	32	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:22:6:AHT20_Stop	32	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:34:9:AHT20_Wait_Ack	32	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:56:6:AHT20_Ack	32	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:68:6:AHT20_NAck	32	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:80:6:AHT20_Send_Byte	32	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:97:9:AHT20_Read_Byte	32	static,ignoring_inline_asm
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:119:6:AHT20_Init	16	static
+F:/stm32cubemx/project/4inch_cubeproject/Src/aht20.c:175:9:AHT20_GetData	40	static
