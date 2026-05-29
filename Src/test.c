@@ -3,6 +3,7 @@
 #include "GUI.h"
 #include "touch.h"
 #include "tim.h"
+#include "usart.h"
 #include "aht20.h"
 #include "bmp280.h"
 #include "delay.h"
@@ -87,6 +88,9 @@ static u16 led_breath_timer = 0;
 #define UI_NAV_OFF              0xDEFB
 #define UI_HINT                 0xD71C
 
+#define PERF_TEST_ENABLE        1
+#define PERF_BOOT_BENCHMARK     1
+
 static s16 wave_temp[WAVE_POINTS];
 static s16 wave_hum[WAVE_POINTS];
 static s16 wave_press[WAVE_POINTS];
@@ -95,7 +99,140 @@ static u8 wave_pos = 0;
 
 static void LED_SetDuty(u16 duty);
 static void LED_RefreshMode(void);
+static void DrawHomeDynamic(void);
+static void DrawWaveDynamic(void);
 static void DrawWaveSeries(s16 *data, s16 min, s16 max, u16 x, u16 y, u16 w, u16 h, u16 color);
+
+#if PERF_TEST_ENABLE
+#ifndef CoreDebug_DEMCR_TRCENA_Msk
+#define CoreDebug_DEMCR_TRCENA_Msk     (1UL << 24)
+#endif
+#ifndef DWT_CTRL_CYCCNTENA_Msk
+#define DWT_CTRL_CYCCNTENA_Msk         (1UL << 0)
+#endif
+
+static u8 perf_ready = 0;
+static u32 perf_hclk_mhz = 72;
+
+static void Perf_Write(const char *text)
+{
+    if(text == NULL) return;
+    HAL_UART_Transmit(&huart1, (uint8_t*)text, (uint16_t)strlen(text), 200);
+}
+
+static void Perf_Init(void)
+{
+    char buf[64];
+
+    perf_hclk_mhz = HAL_RCC_GetHCLKFreq() / 1000000U;
+    if(perf_hclk_mhz == 0) perf_hclk_mhz = 72;
+
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    perf_ready = 1;
+
+    snprintf(buf, sizeof(buf), "\r\n[PERF] UART1 115200 HCLK=%luMHz\r\n",
+             (unsigned long)perf_hclk_mhz);
+    Perf_Write(buf);
+}
+
+static u32 Perf_Now(void)
+{
+    if(!perf_ready) return HAL_GetTick();
+    return DWT->CYCCNT;
+}
+
+static u32 Perf_ElapsedUs(u32 start)
+{
+    u32 elapsed;
+    u32 us;
+
+    if(!perf_ready) return (HAL_GetTick() - start) * 1000U;
+
+    elapsed = DWT->CYCCNT - start;
+    us = (elapsed + perf_hclk_mhz / 2U) / perf_hclk_mhz;
+    if(us == 0 && elapsed > 0) us = 1;
+    return us;
+}
+
+static u32 Perf_FpsX10(u32 us)
+{
+    if(us == 0) return 0;
+    return 10000000U / us;
+}
+
+static const char* Perf_PageName(u8 page)
+{
+    switch(page)
+    {
+        case PAGE_HOME: return "home";
+        case PAGE_TEMP: return "temp";
+        case PAGE_HUMIDITY: return "hum";
+        case PAGE_PRESSURE: return "press";
+        case PAGE_WAVE: return "wave";
+        default: return "unknown";
+    }
+}
+
+static void Perf_PrintMetric(const char *name, u32 us, u32 pixels)
+{
+    char buf[96];
+    u32 fps_x10 = Perf_FpsX10(us);
+
+    if(pixels > 0 && us > 0)
+    {
+        u32 kb_s = (pixels * 2U * 977U) / us;
+        snprintf(buf, sizeof(buf),
+                 "[PERF] %-15s %luus fps=%lu.%lu tx=%luKB/s\r\n",
+                 name,
+                 (unsigned long)us,
+                 (unsigned long)(fps_x10 / 10U),
+                 (unsigned long)(fps_x10 % 10U),
+                 (unsigned long)kb_s);
+    }
+    else
+    {
+        snprintf(buf, sizeof(buf),
+                 "[PERF] %-15s %luus fps=%lu.%lu\r\n",
+                 name,
+                 (unsigned long)us,
+                 (unsigned long)(fps_x10 / 10U),
+                 (unsigned long)(fps_x10 % 10U));
+    }
+    Perf_Write(buf);
+}
+
+static void Perf_PrintRefresh(u8 page, u8 full, u32 us)
+{
+    char buf[80];
+    u32 fps_x10 = Perf_FpsX10(us);
+
+    snprintf(buf, sizeof(buf),
+             "[PERF] refresh %-5s %s %luus fps=%lu.%lu\r\n",
+             Perf_PageName(page),
+             full ? "full" : "part",
+             (unsigned long)us,
+             (unsigned long)(fps_x10 / 10U),
+             (unsigned long)(fps_x10 % 10U));
+    Perf_Write(buf);
+}
+
+static void Perf_PrintSensor(u32 us)
+{
+    char buf[48];
+
+    snprintf(buf, sizeof(buf), "[PERF] sensor read %luus\r\n", (unsigned long)us);
+    Perf_Write(buf);
+}
+#else
+#define Perf_Init()
+#define Perf_Now()              0U
+#define Perf_ElapsedUs(start)   0U
+#define Perf_PrintMetric(name, us, pixels)
+#define Perf_PrintRefresh(page, full, us)
+#define Perf_PrintSensor(us)
+#endif
 
 static void RequestPartialRefresh(void)
 {
@@ -1004,6 +1141,46 @@ void DrawPage_Wave(void)
     DrawNavBar();
 }
 
+static void Perf_RunBootBenchmark(void)
+{
+#if PERF_TEST_ENABLE && PERF_BOOT_BENCHMARK
+    u8 saved_page = current_page;
+    u32 pixels = (u32)lcddev.width * lcddev.height;
+    u32 start;
+
+    Perf_Write("[PERF] boot benchmark start\r\n");
+
+    start = Perf_Now();
+    UiFill(0, 0, lcddev.width - 1, lcddev.height - 1, BLACK);
+    Perf_PrintMetric("LCD full fill", Perf_ElapsedUs(start), pixels);
+
+    current_page = PAGE_HOME;
+    start = Perf_Now();
+    DrawPage_Home();
+    Perf_PrintMetric("Draw home", Perf_ElapsedUs(start), 0);
+
+    start = Perf_Now();
+    DrawHomeDynamic();
+    Perf_PrintMetric("Home dynamic", Perf_ElapsedUs(start), 0);
+
+    current_page = PAGE_WAVE;
+    start = Perf_Now();
+    DrawPage_Wave();
+    Perf_PrintMetric("Draw wave", Perf_ElapsedUs(start), 0);
+
+    start = Perf_Now();
+    DrawWaveDynamic();
+    Perf_PrintMetric("Wave dynamic", Perf_ElapsedUs(start), 0);
+
+    start = Perf_Now();
+    Gui_Drawbmp16_Custom(417, 48, ICON_PEIXIAO_W, ICON_PEIXIAO_H, gImage_peixiao);
+    Perf_PrintMetric("Peixiao bmp", Perf_ElapsedUs(start), (u32)ICON_PEIXIAO_W * ICON_PEIXIAO_H);
+
+    current_page = saved_page;
+    Perf_Write("[PERF] boot benchmark end\r\n");
+#endif
+}
+
 void SwitchPage(u8 page)
 {
     if(page >= PAGE_COUNT) return;
@@ -1013,7 +1190,19 @@ void SwitchPage(u8 page)
 
 void RefreshPage(void)
 {
+#if PERF_TEST_ENABLE
+    u32 perf_start;
+    u8 perf_page;
+    u8 perf_full;
+#endif
+
     if(!need_refresh) return;
+
+#if PERF_TEST_ENABLE
+    perf_start = Perf_Now();
+    perf_page = current_page;
+    perf_full = need_full_refresh ? 1 : 0;
+#endif
 
     if(!need_full_refresh)
     {
@@ -1038,6 +1227,9 @@ void RefreshPage(void)
                 break;
         }
         FinishRefresh();
+#if PERF_TEST_ENABLE
+        Perf_PrintRefresh(perf_page, perf_full, Perf_ElapsedUs(perf_start));
+#endif
         return;
     }
     
@@ -1062,6 +1254,9 @@ void RefreshPage(void)
             break;
     }
     FinishRefresh();
+#if PERF_TEST_ENABLE
+    Perf_PrintRefresh(perf_page, perf_full, Perf_ElapsedUs(perf_start));
+#endif
 }
 
 /* ========== 触摸处理（保留兼容） ========== */
@@ -1312,13 +1507,27 @@ void UpdateSensorData(void)
 void main_test(void)
 {
     u8 key;
+#if PERF_TEST_ENABLE
+    u32 perf_start;
+#endif
 
     TP_Init();
     KEY_Init();         // 初始化物理按键
     LED_Init();         // 初始化LED
     BMP280_Init();
+    Perf_Init();
     
+#if PERF_TEST_ENABLE
+    perf_start = Perf_Now();
+#endif
     UpdateSensorData();
+#if PERF_TEST_ENABLE
+    Perf_PrintSensor(Perf_ElapsedUs(perf_start));
+#endif
+
+#if PERF_TEST_ENABLE && PERF_BOOT_BENCHMARK
+    Perf_RunBootBenchmark();
+#endif
     
     DrawPage_Home();
     FinishRefresh();
@@ -1346,7 +1555,13 @@ void main_test(void)
         sensor_timer += 10;
         if(sensor_timer >= 2000)
         {
+#if PERF_TEST_ENABLE
+            perf_start = Perf_Now();
+#endif
             UpdateSensorData();
+#if PERF_TEST_ENABLE
+            Perf_PrintSensor(Perf_ElapsedUs(perf_start));
+#endif
             sensor_timer = 0;
             if(current_page == PAGE_HOME || current_page == PAGE_WAVE)
             {
